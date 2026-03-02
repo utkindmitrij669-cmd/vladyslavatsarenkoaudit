@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Помилка оплати</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #1C1C1C; color: #ffffff; font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4">
+    <div class="max-w-sm mx-auto text-center">
+        
+        <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-red-500/20 flex items-center justify-center">
+            <svg class="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </div>
+
+        <h1 class="text-3xl font-black uppercase mb-3 text-white">
+            Щось <span class="text-red-400">пішло не так</span>
+        </h1>
+        
+        <p class="text-gray-300 text-base leading-relaxed mb-8">
+            Оплата не пройшла. Спробуй ще раз або зв'яжись зі мною напряму.
+        </p>
+
+        <div class="space-y-3">
+            <a href="/" class="block w-full bg-[#E63946] hover:bg-[#9B2226] text-white font-extrabold text-base py-4 rounded-xl transition-all uppercase tracking-wide text-center">
+                Спробувати ще раз
+            </a>
+            
+            <a href="https://t.me/+6a38CF05_Xk0MTI0" class="block w-full bg-[#262626] hover:bg-[#333] text-white font-bold text-base py-4 rounded-xl transition-all uppercase tracking-wide text-center border border-[#404040]">
+                Написати в Telegram
+            </a>
+        </div>
+
+        <p class="text-gray-600 text-[10px] mt-8 uppercase tracking-widest">Влада Царенко © 2026</p>
+    </div>
+</body>
+</html>
