@@ -1179,15 +1179,14 @@
             container.scrollBy({ left: scrollAmount * direction, behavior: 'smooth' });
         }
 
-        // --- PAYMENT LOGIC (redirect через Google Apps Script → WayForPay) ---
-        // Ніяких CORS проблем — просто redirect
+        // --- PAYMENT LOGIC (той самий підхід що у Ілони) ---
 
         function getUTM() {
             const params = new URLSearchParams(window.location.search);
             return {
-                campaign: params.get('utm_campaign') || '',
-                adset: params.get('utm_content') || '',
-                ad: params.get('utm_term') || ''
+                campaign_name: params.get('utm_campaign') || '',
+                adset_name: params.get('utm_content') || '',
+                ad_name: params.get('utm_term') || ''
             };
         }
 
@@ -1204,21 +1203,74 @@
                 content_category: amount + ' грн'
             });
 
-            // Збираємо параметри
+            // Формуємо URL з параметрами (як у Ілони — action + params)
             const params = new URLSearchParams({
+                action: 'vlada_paid',
                 name: name,
-                phone: phone,
+                full_phone: phone,
                 telegram: telegram,
                 amount: amount,
                 currency: 'UAH',
                 return_url: returnUrl,
-                campaign: utm.campaign,
-                adset: utm.adset,
-                ad: utm.ad
+                campaign_name: utm.campaign_name,
+                adset_name: utm.adset_name,
+                ad_name: utm.ad_name
             });
 
-            // Redirect на Google Apps Script — він запише дані і перенаправить на WayForPay
-            window.location.href = GOOGLE_SCRIPT_URL + '?' + params.toString();
+            // Відправляємо через fetch → отримуємо paymentData → сабмітимо форму на WayForPay
+            fetch(GOOGLE_SCRIPT_URL + '?' + params.toString(), {
+                method: 'POST',
+                body: ''
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.result === 'success' && data.paymentData) {
+                    // Створюємо форму і відправляємо на WayForPay
+                    var pd = data.paymentData;
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = 'https://secure.wayforpay.com/pay';
+                    form.style.display = 'none';
+
+                    var fields = {
+                        merchantAccount: pd.merchantAccount,
+                        merchantAuthType: 'SimpleSignature',
+                        merchantDomainName: pd.merchantDomainName,
+                        merchantSignature: pd.merchantSignature,
+                        orderReference: pd.orderReference,
+                        orderDate: pd.orderDate,
+                        amount: pd.amount,
+                        currency: pd.currency,
+                        'productName[]': pd.productName,
+                        'productCount[]': pd.productCount,
+                        'productPrice[]': pd.productPrice,
+                        clientFirstName: pd.clientFirstName,
+                        clientPhone: pd.clientPhone,
+                        language: 'UA',
+                        returnUrl: pd.returnUrl,
+                        serviceUrl: pd.serviceUrl
+                    };
+
+                    for (var key in fields) {
+                        var input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = key;
+                        input.value = fields[key] || '';
+                        form.appendChild(input);
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    throw new Error(data.error || 'Помилка');
+                }
+            })
+            .catch(function(err) {
+                console.error('Payment error:', err);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'СПРОБУВАТИ ЩЕ РАЗ';
+                alert('Виникла помилка. Спробуйте ще раз.');
+            });
         }
 
         // --- FORM HANDLER ---
